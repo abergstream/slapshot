@@ -33,6 +33,7 @@ export const state = {
   draggingLayer: null as { layer: ImageLayer; offX: number; offY: number } | null,
   shapes:        [] as Shape[],
   undoStack:     [] as Shape[][],
+  redoStack:     [] as Shape[][],
   currentTool:   'arrow' as Tool,
   isDrawing:     false,
   startX:        0,
