@@ -29,6 +29,10 @@ sizeBtns.forEach(btn => {
   });
 });
 
+document.getElementById('captureBtn')!.addEventListener('click', () => {
+  window.electronAPI?.startScrollCapture();
+});
+
 document.getElementById('undoBtn')!.addEventListener('click', undo);
 
 document.getElementById('clearBtn')!.addEventListener('click', () => {

@@ -1,6 +1,34 @@
 import { canvas, emptyState, state } from '../core/state';
 import { render } from '../canvas/render';
 
+export async function loadCapturedImage(dataUrl: string) {
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  const bitmap = await createImageBitmap(blob);
+
+  state.bgImage       = bitmap;
+  state.shapes        = [];
+  state.undoStack     = [];
+  state.redoStack     = [];
+  state.activeShape   = null;
+  state.imageLayers   = [];
+  state.selectedLayer = null;
+
+  canvas.width  = bitmap.width;
+  canvas.height = bitmap.height;
+  canvas.style.display     = 'block';
+  emptyState.style.display = 'none';
+  document.getElementById('workspace')!.classList.add('has-image');
+
+  const toolbarH = (document.getElementById('toolbar') as HTMLElement).offsetHeight;
+  window.electronAPI?.resizeToImage(bitmap.width, bitmap.height + toolbarH);
+
+  render();
+  canvas.focus();
+}
+
+window.electronAPI?.onCapturedImage(loadCapturedImage);
+
 export function newSession() {
   state.bgImage       = null;
   state.imageLayers   = [];

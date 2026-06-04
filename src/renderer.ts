@@ -16,16 +16,18 @@ const isMac = navigator.platform.startsWith('Mac');
 
 (document.getElementById('paste-hint-key') as HTMLElement).textContent = isMac ? 'Cmd+V' : 'Ctrl+V';
 
+window.electronAPI?.onHotkeyCopy(() => copyToClipboard());
+
 document.addEventListener('keydown', e => {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
   const mod = isMac ? e.metaKey : e.ctrlKey;
 
+  if (mod && e.shiftKey && e.key === 'S') { e.preventDefault(); window.electronAPI?.startScrollCapture(); return; }
   if (mod && e.key === 'n') { e.preventDefault(); newSession();        return; }
   if (mod && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
   if (mod && e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); redo(); return; }
   if (mod && e.key === 's') { e.preventDefault(); saveToFile();        return; }
-  if (mod && e.shiftKey && e.key === 'C') { e.preventDefault(); copyToClipboard(); return; }
 
   if (!e.ctrlKey && !e.metaKey && !e.altKey) {
     const map: Record<string, Tool> = { a: 'arrow', r: 'rect', e: 'circle', p: 'pen', h: 'highlight', t: 'text' };

@@ -7,5 +7,15 @@ interface Window {
   electronAPI?: {
     resizeToImage: (contentW: number, contentH: number) => void;
     resetWindow: () => void;
+    startScrollCapture: () => void;
+    onCapturedImage: (callback: (dataUrl: string) => void) => void;
+    writeImageToClipboard: (dataUrl: string) => Promise<void>;
+    onHotkeyCopy: (cb: () => void) => void;
+  };
+  captureAPI?: {
+    captureArea: (rect: { x: number; y: number; width: number; height: number }) => Promise<string>;
+    updateCapture: (dataUrl: string) => void;
+    close: () => void;
+    setIgnoreMouseEvents: (ignore: boolean) => void;
   };
 }

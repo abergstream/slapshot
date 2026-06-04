@@ -6,6 +6,7 @@ function exportBlob(): Promise<Blob> {
   });
 }
 
+
 export function flashButton(id: string) {
   const btn = document.getElementById(id);
   if (!btn) return;
@@ -16,8 +17,7 @@ export function flashButton(id: string) {
 export async function copyToClipboard() {
   if (!state.bgImage) return;
   try {
-    const blob = await exportBlob();
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    await window.electronAPI?.writeImageToClipboard(canvas.toDataURL('image/png'));
     flashButton('copyBtn');
   } catch (err) {
     console.error('Copy failed:', err);

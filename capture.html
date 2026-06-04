@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 100%; height: 100%;
+        background: transparent;
+        overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #overlay-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        cursor: crosshair;
+      }
+      #overlay-canvas.ready { cursor: default; }
+      #toolbar {
+        display: none;
+        position: fixed;
+        background: #2a2a2a;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        padding: 8px 12px;
+        gap: 8px;
+        align-items: center;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.65);
+        z-index: 100;
+        font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+        color: #fff;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      #toolbar.visible { display: flex; }
+      #capture-count { color: #999; min-width: 74px; }
+      .btn {
+        padding: 4px 12px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        line-height: 20px;
+      }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      #btn-capture { background: #007AFF; color: #fff; }
+      #btn-capture:hover:not(:disabled) { background: #0066dd; }
+      #btn-done { background: #34C759; color: #fff; }
+      #btn-done:hover:not(:disabled) { background: #28a845; }
+      #btn-cancel { background: #444; color: #ddd; }
+      #btn-cancel:hover { background: #555; }
+    </style>
+  </head>
+  <body>
+    <canvas id="overlay-canvas"></canvas>
+    <div id="toolbar">
+      <span id="capture-count">0 captures</span>
+      <button class="btn" id="btn-capture">Capture</button>
+      <button class="btn" id="btn-done" disabled>Done</button>
+      <button class="btn" id="btn-cancel">Cancel</button>
+    </div>
+    <script type="module" src="/src/capture-renderer.ts"></script>
+  </body>
+</html>
