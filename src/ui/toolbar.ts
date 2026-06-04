@@ -1,4 +1,4 @@
-import { canvas, state } from '../core/state';
+import { canvas, state, saveStrokeWidth } from '../core/state';
 import { render } from '../canvas/render';
 import { undo, saveUndo } from '../core/history';
 import type { Tool } from '../core/types';
@@ -15,10 +15,16 @@ document.querySelectorAll<HTMLElement>('.tool-btn').forEach(btn => {
   btn.addEventListener('click', () => setTool(btn.dataset.tool as Tool));
 });
 
-document.querySelectorAll<HTMLElement>('.size-btn').forEach(btn => {
+const sizeBtns = document.querySelectorAll<HTMLElement>('.size-btn');
+
+sizeBtns.forEach(btn => {
+  if (parseInt(btn.dataset.size!) === state.strokeWidth) btn.classList.add('active');
+  else btn.classList.remove('active');
+
   btn.addEventListener('click', () => {
     state.strokeWidth = parseInt(btn.dataset.size!);
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    saveStrokeWidth(state.strokeWidth);
+    sizeBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
 });

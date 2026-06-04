@@ -16,6 +16,15 @@ function loadSwatchColors(): string[] {
   return [...DEFAULT_COLORS];
 }
 
+export function saveStrokeWidth(width: number) {
+  localStorage.setItem('strokeWidth', String(width));
+}
+
+function loadStrokeWidth(): number {
+  const saved = localStorage.getItem('strokeWidth');
+  return saved ? parseInt(saved) : 4;
+}
+
 export const swatchColors = loadSwatchColors();
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
@@ -40,7 +49,7 @@ export const state = {
   startY:        0,
   activeShape:   null as Shape | null,
   color:         '',
-  strokeWidth:   4,
+  strokeWidth:   loadStrokeWidth(),
 };
 
 state.color = swatchColors[0];

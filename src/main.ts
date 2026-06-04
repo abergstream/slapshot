@@ -25,6 +25,8 @@ ipcMain.on("reset-window", () => {
 });
 
 const createWindow = () => {
+  if (app.dock) app.dock.setIcon(path.join(__dirname, '../../assets/icon.png'));
+
   mainWindow = new BrowserWindow({
     width: 840,
     height: 320,

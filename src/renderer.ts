@@ -14,6 +14,8 @@ import type { Tool } from './core/types';
 
 const isMac = navigator.platform.startsWith('Mac');
 
+(document.getElementById('paste-hint-key') as HTMLElement).textContent = isMac ? 'Cmd+V' : 'Ctrl+V';
+
 document.addEventListener('keydown', e => {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
