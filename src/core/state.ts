@@ -47,9 +47,10 @@ export const state = {
   isDrawing:     false,
   startX:        0,
   startY:        0,
-  activeShape:   null as Shape | null,
-  color:         '',
-  strokeWidth:   loadStrokeWidth(),
+  activeShape:       null as Shape | null,
+  eraserHoverIndex:  -1,
+  color:             '',
+  strokeWidth:       loadStrokeWidth(),
 };
 
 state.color = swatchColors[0];

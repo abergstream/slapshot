@@ -26,7 +26,6 @@ ipcMain.on("resize-to-image", (_e, contentW: number, contentH: number) => {
 ipcMain.on("reset-window", () => {
   if (!mainWindow) return;
   mainWindow.setSize(840, 320);
-  mainWindow.center();
 });
 
 ipcMain.handle("open-capture-overlay", () => {

@@ -52,7 +52,7 @@ document.addEventListener('keydown', e => {
   if (mod && e.key === 's') { e.preventDefault(); saveToFile();        return; }
 
   if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-    const map: Record<string, Tool> = { a: 'arrow', r: 'rect', e: 'circle', p: 'pen', h: 'highlight', t: 'text' };
+    const map: Record<string, Tool> = { a: 'arrow', r: 'rect', e: 'circle', p: 'pen', h: 'highlight', t: 'text', x: 'eraser' };
     if (map[e.key.toLowerCase()]) setTool(map[e.key.toLowerCase()]);
   }
 });

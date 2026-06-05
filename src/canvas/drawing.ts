@@ -1,7 +1,10 @@
 import { canvas, state } from '../core/state';
 import { render } from './render';
 import { saveUndo } from '../core/history';
-import { startTextInput } from './text';
+import { startTextBox, editTextBox } from './text';
+import { findTopmostShape } from './eraser';
+
+let eraserUndoSaved = false;
 
 function getCanvasPos(e: MouseEvent): [number, number] {
   const rect   = canvas.getBoundingClientRect();
@@ -28,9 +31,31 @@ canvas.addEventListener('mousedown', e => {
   }
   state.selectedLayer = null;
 
-  if (state.currentTool === 'text') {
-    startTextInput(x, y);
+  if (state.currentTool === 'eraser') {
+    eraserUndoSaved = false;
+    const idx = findTopmostShape(state.shapes, x, y);
+    if (idx >= 0) {
+      saveUndo();
+      eraserUndoSaved = true;
+      state.shapes.splice(idx, 1);
+      state.eraserHoverIndex = findTopmostShape(state.shapes, x, y);
+      render();
+    }
+    state.isDrawing = true;
     return;
+  }
+
+  if (state.currentTool === 'text') {
+    for (let i = state.shapes.length - 1; i >= 0; i--) {
+      const s = state.shapes[i];
+      if (s.type !== 'textbox') continue;
+      const x0 = s.w < 0 ? s.x + s.w : s.x;
+      const y0 = s.h < 0 ? s.y + s.h : s.y;
+      if (x >= x0 && x <= x0 + Math.abs(s.w) && y >= y0 && y <= y0 + Math.abs(s.h)) {
+        editTextBox(i);
+        return;
+      }
+    }
   }
 
   state.isDrawing = true;
@@ -46,12 +71,37 @@ canvas.addEventListener('mousemove', e => {
   if (state.draggingLayer) return;
   const [x, y] = getCanvasPos(e);
 
+  if (state.currentTool === 'eraser') {
+    const idx = findTopmostShape(state.shapes, x, y);
+    state.eraserHoverIndex = idx;
+    canvas.style.cursor = idx >= 0 ? 'pointer' : 'crosshair';
+    if (state.isDrawing && idx >= 0) {
+      if (!eraserUndoSaved) { saveUndo(); eraserUndoSaved = true; }
+      state.shapes.splice(idx, 1);
+      state.eraserHoverIndex = findTopmostShape(state.shapes, x, y);
+    }
+    render();
+    return;
+  }
+
   if (!state.isDrawing) {
     const overLayer = state.imageLayers.some(l =>
       x >= l.x && x <= l.x + l.bitmap.width &&
       y >= l.y && y <= l.y + l.bitmap.height
     );
-    canvas.style.cursor = overLayer ? 'move' : (state.currentTool === 'text' ? 'text' : 'crosshair');
+    if (overLayer) {
+      canvas.style.cursor = 'move';
+    } else if (state.currentTool === 'text') {
+      const overTextbox = state.shapes.some(s => {
+        if (s.type !== 'textbox') return false;
+        const x0 = s.w < 0 ? s.x + s.w : s.x;
+        const y0 = s.h < 0 ? s.y + s.h : s.y;
+        return x >= x0 && x <= x0 + Math.abs(s.w) && y >= y0 && y <= y0 + Math.abs(s.h);
+      });
+      canvas.style.cursor = overTextbox ? 'text' : 'crosshair';
+    } else {
+      canvas.style.cursor = 'crosshair';
+    }
     return;
   }
 
@@ -87,6 +137,16 @@ canvas.addEventListener('mousemove', e => {
       state.activeShape = { type: 'highlight', x: startX, y: startY, w, h, color };
       break;
     }
+
+    case 'text': {
+      const w = x - startX, h = y - startY;
+      state.activeShape = {
+        type: 'textbox', x: startX, y: startY, w, h,
+        text: '', color, bgColor: 'transparent', bgOpacity: 0.85,
+        fontSize: 16, fontFamily: 'system-ui', bold: false, italic: false, underline: false,
+      };
+      break;
+    }
   }
 
   render();
@@ -98,6 +158,14 @@ function finishDrawing() {
 
   const s = state.activeShape;
   if (s) {
+    if (s.type === 'textbox') {
+      const { x, y, w, h } = s;
+      state.activeShape = null;
+      render();
+      if (Math.abs(w) > 20 && Math.abs(h) > 20) startTextBox(x, y, w, h);
+      return;
+    }
+
     let valid = true;
     if (s.type === 'arrow')     valid = Math.hypot(s.x2 - s.x1, s.y2 - s.y1) > 8;
     else if (s.type === 'pen')  valid = s.points.length > 3;

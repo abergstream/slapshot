@@ -5,10 +5,12 @@ import type { Tool } from '../core/types';
 
 export function setTool(tool: Tool) {
   state.currentTool = tool;
+  state.eraserHoverIndex = -1;
   document.querySelectorAll<HTMLElement>('.tool-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tool === tool);
   });
-  canvas.style.cursor = tool === 'text' ? 'text' : 'crosshair';
+  canvas.style.cursor = 'crosshair';
+  render();
 }
 
 document.querySelectorAll<HTMLElement>('.tool-btn').forEach(btn => {
