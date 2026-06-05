@@ -5,15 +5,21 @@ import started from "electron-squirrel-startup";
 if (started) {
   app.quit();
 }
-
+let toolbarMinWidth = 860;
+const minHeight = 300;
 let mainWindow: BrowserWindow | null = null;
 let overlayWindow: BrowserWindow | null = null;
+
+ipcMain.on("set-min-width", (_e, width: number) => {
+  toolbarMinWidth = width;
+  mainWindow?.setMinimumSize(toolbarMinWidth, minHeight);
+});
 
 ipcMain.on("resize-to-image", (_e, contentW: number, contentH: number) => {
   if (!mainWindow) return;
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-  const w = Math.max(840, Math.min(contentW, sw));
-  const h = Math.max(200, Math.min(contentH, sh));
+  const w = Math.max(toolbarMinWidth, Math.min(contentW, sw));
+  const h = Math.max(minHeight, Math.min(contentH, sh));
   mainWindow.setContentSize(w, h);
 });
 
@@ -124,10 +130,10 @@ const createWindow = () => {
   if (app.dock) app.dock.setIcon(path.join(__dirname, '../../assets/icon.png'));
 
   mainWindow = new BrowserWindow({
-    width: 840,
+    width: toolbarMinWidth,
     height: 320,
-    minWidth: 840,
-    minHeight: 320,
+    minWidth: toolbarMinWidth,
+    minHeight: minHeight,
     backgroundColor: "#1a1a1a",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

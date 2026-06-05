@@ -13,4 +13,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('write-image-to-clipboard', dataUrl),
   onHotkeyCopy: (cb: () => void) =>
     ipcRenderer.on('hotkey-copy', cb),
+  setMinWidth: (width: number) =>
+    ipcRenderer.send('set-min-width', width),
 });

@@ -11,6 +11,7 @@ interface Window {
     onCapturedImage: (callback: (dataUrl: string) => void) => void;
     writeImageToClipboard: (dataUrl: string) => Promise<void>;
     onHotkeyCopy: (cb: () => void) => void;
+    setMinWidth: (width: number) => void;
   };
   captureAPI?: {
     captureArea: (rect: { x: number; y: number; width: number; height: number }) => Promise<string>;
