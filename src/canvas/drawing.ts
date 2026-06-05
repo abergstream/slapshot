@@ -13,6 +13,13 @@ function getCanvasPos(e: MouseEvent): [number, number] {
   return [(e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY];
 }
 
+function snapTo45(x1: number, y1: number, x2: number, y2: number): [number, number] {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const snapped = Math.round(angle / (Math.PI / 4)) * (Math.PI / 4);
+  const dist = Math.hypot(x2 - x1, y2 - y1);
+  return [x1 + dist * Math.cos(snapped), y1 + dist * Math.sin(snapped)];
+}
+
 // ── Canvas mouse events ───────────────────────────────────────────────────────
 
 canvas.addEventListener('mousedown', e => {
@@ -109,9 +116,11 @@ canvas.addEventListener('mousemove', e => {
   const shift = e.shiftKey;
 
   switch (state.currentTool) {
-    case 'arrow':
-      state.activeShape = { type: 'arrow', x1: startX, y1: startY, x2: x, y2: y, color, width: strokeWidth };
+    case 'arrow': {
+      const [x2, y2] = shift ? snapTo45(startX, startY, x, y) : [x, y];
+      state.activeShape = { type: 'arrow', x1: startX, y1: startY, x2, y2, color, width: strokeWidth };
       break;
+    }
 
     case 'rect': {
       let w = x - startX, h = y - startY;
@@ -128,7 +137,14 @@ canvas.addEventListener('mousemove', e => {
     }
 
     case 'pen':
-      if (state.activeShape?.type === 'pen') state.activeShape.points.push([x, y]);
+      if (state.activeShape?.type === 'pen') {
+        if (shift) {
+          const [sx, sy] = snapTo45(startX, startY, x, y);
+          state.activeShape.points = [[startX, startY], [sx, sy]];
+        } else {
+          state.activeShape.points.push([x, y]);
+        }
+      }
       break;
 
     case 'highlight': {
@@ -168,7 +184,9 @@ function finishDrawing() {
 
     let valid = true;
     if (s.type === 'arrow')     valid = Math.hypot(s.x2 - s.x1, s.y2 - s.y1) > 8;
-    else if (s.type === 'pen')  valid = s.points.length > 3;
+    else if (s.type === 'pen')  valid = s.points.length === 2
+      ? Math.hypot(s.points[1][0] - s.points[0][0], s.points[1][1] - s.points[0][1]) > 8
+      : s.points.length > 3;
     else if (s.type === 'rect' || s.type === 'highlight') valid = Math.abs(s.w) > 5 && Math.abs(s.h) > 5;
     else if (s.type === 'circle') valid = Math.abs(s.rx) > 4 || Math.abs(s.ry) > 4;
 
