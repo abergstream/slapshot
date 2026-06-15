@@ -12,6 +12,10 @@ interface Window {
     writeImageToClipboard: (dataUrl: string) => Promise<void>;
     onHotkeyCopy: (cb: () => void) => void;
     setMinWidth: (width: number) => void;
+    onUpdateAvailable: (cb: () => void) => void;
+    onUpdateDownloaded: (cb: () => void) => void;
+    downloadUpdate: () => void;
+    installUpdate: () => void;
   };
   captureAPI?: {
     captureArea: (rect: { x: number; y: number; width: number; height: number }) => Promise<string>;

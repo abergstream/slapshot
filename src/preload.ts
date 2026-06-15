@@ -15,4 +15,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('hotkey-copy', cb),
   setMinWidth: (width: number) =>
     ipcRenderer.send('set-min-width', width),
+  onUpdateAvailable: (cb: () => void) =>
+    ipcRenderer.on('update-available', cb),
+  onUpdateDownloaded: (cb: () => void) =>
+    ipcRenderer.on('update-downloaded', cb),
+  downloadUpdate: () =>
+    ipcRenderer.send('download-update'),
+  installUpdate: () =>
+    ipcRenderer.send('install-update'),
 });

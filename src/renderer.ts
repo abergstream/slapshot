@@ -14,29 +14,33 @@ import type { Tool } from './core/types';
 
 const isMac = navigator.platform.startsWith('Mac');
 
-function reportToolbarMinWidth() {
-  const toolbar = document.getElementById('toolbar')!;
-  const style = getComputedStyle(toolbar);
-  const gap = parseFloat(style.columnGap) || 0;
-  const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-
-  let width = padding;
-  let count = 0;
-  for (const child of toolbar.children) {
-    const el = child as HTMLElement;
-    if (el.classList.contains('spacer')) continue;
-    const cs = getComputedStyle(el);
-    width += el.offsetWidth + (parseFloat(cs.marginLeft) || 0) + (parseFloat(cs.marginRight) || 0);
-    count++;
-  }
-  if (count > 1) width += gap * (count - 1);
-
-  window.electronAPI?.setMinWidth(Math.ceil(width));
-}
-
-reportToolbarMinWidth();
 
 (document.getElementById('paste-hint-key') as HTMLElement).textContent = isMac ? 'Cmd+V' : 'Ctrl+V';
+
+const updateBtn = document.getElementById('updateBtn') as HTMLButtonElement;
+
+window.electronAPI?.onUpdateAvailable(() => {
+  updateBtn.style.display = 'flex';
+  updateBtn.dataset.state = 'available';
+  updateBtn.title = 'Download update';
+});
+
+window.electronAPI?.onUpdateDownloaded(() => {
+  updateBtn.dataset.state = 'ready';
+  updateBtn.disabled = false;
+  updateBtn.title = 'Restart to install update';
+});
+
+updateBtn.addEventListener('click', () => {
+  if (updateBtn.dataset.state === 'ready') {
+    window.electronAPI?.installUpdate();
+  } else if (updateBtn.dataset.state === 'available') {
+    updateBtn.dataset.state = 'downloading';
+    updateBtn.disabled = true;
+    updateBtn.title = 'Downloading update...';
+    window.electronAPI?.downloadUpdate();
+  }
+});
 
 window.electronAPI?.onHotkeyCopy(() => copyToClipboard());
 

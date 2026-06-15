@@ -109,6 +109,44 @@ body {
   color: #34C759;
 }
 
+.action-btn.update-btn[data-state="available"] {
+  color: #34C759;
+  animation: update-pulse 2s ease-in-out infinite;
+}
+
+.action-btn.update-btn[data-state="available"]:hover {
+  background: rgba(52, 199, 89, 0.15);
+  color: #4cd964;
+}
+
+.action-btn.update-btn[data-state="downloading"] {
+  color: #666;
+  cursor: default;
+}
+
+.action-btn.update-btn[data-state="downloading"] svg {
+  animation: update-spin 1s linear infinite;
+}
+
+.action-btn.update-btn[data-state="ready"] {
+  color: #34C759;
+}
+
+.action-btn.update-btn[data-state="ready"]:hover {
+  background: rgba(52, 199, 89, 0.15);
+  color: #4cd964;
+}
+
+@keyframes update-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes update-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Color group */
 
 .color-group {
