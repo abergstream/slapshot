@@ -22,7 +22,7 @@ const FEED_URL = `https://update.electronjs.org/abergstream/slapshot/${process.p
 async function checkForUpdate() {
   try {
     const res = await net.fetch(FEED_URL);
-    if (res.status !== 204) {
+    if (res.status === 200) {
       mainWindow?.webContents.send("update-available");
     }
   } catch {
@@ -35,6 +35,10 @@ if (app.isPackaged) {
 
   autoUpdater.on("update-downloaded", () => {
     mainWindow?.webContents.send("update-downloaded");
+  });
+
+  autoUpdater.on("error", (err) => {
+    mainWindow?.webContents.send("update-error", err.message);
   });
 }
 
@@ -117,6 +121,9 @@ ipcMain.handle("open-capture-overlay", () => {
 
     return win;
   });
+
+  // screen-saver alwaysOnTop changes the macOS activation policy, hiding the Dock icon.
+  app.dock?.show();
 });
 
 ipcMain.handle(
@@ -154,11 +161,13 @@ ipcMain.handle(
       sources.find((s) => s.display_id === String(targetDisplay.id)) ??
       sources[Math.min(displayIndex, sources.length - 1)];
 
-    // Selection coords are relative to the overlay window which equals the display origin,
-    // so no offset needed — just scale by the display's scale factor.
+    // On macOS the OS pushes windows below the menu bar, so the overlay's actual origin
+    // is displaced from display.bounds. Add the offset when cropping the full-screen thumbnail.
+    const winOffsetX = process.platform === 'darwin' ? winBounds.x - targetDisplay.bounds.x : 0;
+    const winOffsetY = process.platform === 'darwin' ? winBounds.y - targetDisplay.bounds.y : 0;
     const cropped = source.thumbnail.crop({
-      x: Math.round(rect.x * sf),
-      y: Math.round(rect.y * sf),
+      x: Math.round((rect.x + winOffsetX) * sf),
+      y: Math.round((rect.y + winOffsetY) * sf),
       width: Math.round(rect.width * sf),
       height: Math.round(rect.height * sf),
     });
@@ -177,6 +186,7 @@ ipcMain.on("update-capture", (_e, dataUrl: string) => {
 ipcMain.on("close-capture-overlay", () => {
   for (const w of overlayWindows) if (!w.isDestroyed()) w.close();
   overlayWindows = [];
+  app.dock?.show();
 });
 
 ipcMain.on("set-ignore-mouse-events", (e, ignore: boolean) => {
@@ -191,7 +201,7 @@ ipcMain.handle("write-image-to-clipboard", (_e, dataUrl: string) => {
 });
 
 const createWindow = () => {
-  if (app.dock) app.dock.setIcon(path.join(__dirname, "../../assets/icon.png"));
+  if (app.dock && !app.isPackaged) app.dock.setIcon(path.join(__dirname, "../../assets/icon.png"));
 
   mainWindow = new BrowserWindow({
     width: toolbarMinWidth,

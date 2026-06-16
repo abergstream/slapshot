@@ -14,6 +14,7 @@ interface Window {
     setMinWidth: (width: number) => void;
     onUpdateAvailable: (cb: () => void) => void;
     onUpdateDownloaded: (cb: () => void) => void;
+    onUpdateError: (cb: (msg: string) => void) => void;
     downloadUpdate: () => void;
     installUpdate: () => void;
   };

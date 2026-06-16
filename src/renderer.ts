@@ -31,6 +31,12 @@ window.electronAPI?.onUpdateDownloaded(() => {
   updateBtn.title = 'Restart to install update';
 });
 
+window.electronAPI?.onUpdateError(() => {
+  updateBtn.dataset.state = 'available';
+  updateBtn.disabled = false;
+  updateBtn.title = 'Download update';
+});
+
 updateBtn.addEventListener('click', () => {
   if (updateBtn.dataset.state === 'ready') {
     window.electronAPI?.installUpdate();
